@@ -62,11 +62,17 @@ class ProxyMaker(object):
             except JobLookupError:
                 pass
             log.info(f'{this_rate} has no task')
+            # 关闭事件循环，防止内存泄漏
+            loop.close()
             return
 
         log.info(f'{this_rate}/s run {len(tasks)}')
 
-        loop.run_until_complete(asyncio.wait(tasks))
+        try:
+            loop.run_until_complete(asyncio.wait(tasks))
+        finally:
+            # 确保在任何情况下都关闭事件循环，防止内存泄漏
+            loop.close()
 
     async def run_once(self, source, obj):
         cur_proxy = set()
@@ -115,7 +121,12 @@ class ProxyChecker(BaseProxyGetter):
             tasks.append(asyncio.ensure_future(self.check_proxy(proxy, source), loop=loop))
 
         log.info(f'proxy check need check {len(tasks)} proxy')
-        loop.run_until_complete(asyncio.wait(tasks))
+        
+        try:
+            loop.run_until_complete(asyncio.wait(tasks))
+        finally:
+            # 确保在任何情况下都关闭事件循环，防止内存泄漏
+            loop.close()
 
         for task in tasks:
             isvalid, source, proxy = task.result()
