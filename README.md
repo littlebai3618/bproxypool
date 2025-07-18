@@ -1,4 +1,4 @@
-# BProxyPool - 基于Redis的代理池服务框架
+# BProxyPool - 智能代理池服务框架
 
 <p align="center">
   <a href="https://github.com/python">
@@ -9,55 +9,57 @@
   </a>
 </p>
 
-## 📖 项目简介
+## 🚀 项目简介
 
-BProxyPool 是一个纯Python实现的、RESTful风格的基于Redis的代理池服务框架。区别于传统代理池服务，本框架引入了**虚拟代理池(virtual_pool)**的创新概念，在一个实际的代理池基础上抽象出逻辑上相互独立的多个代理池。这种设计在多项目抓取场景下，可以根据不同网站分配不同的代理池，显著提高代理资源的利用率。
+BProxyPool 是一个基于 Python 开发的高性能代理池服务框架，采用 RESTful API 设计和 Redis 存储。本项目的核心亮点是引入了**虚拟代理池（virtual_pool）**概念，能够在单个物理代理池基础上抽象出多个逻辑独立的代理池，显著提升代理资源的利用效率。
 
-## ✨ 核心特色
+## ✨ 核心特性
 
-- 🎯 **虚拟代理池** - 支持在单一物理代理池上创建多个逻辑独立的虚拟代理池
-- 🌐 **RESTful API** - 规范的REST风格接口设计，易于集成和使用
-- ⚡ **高性能架构** - 采用协程+线程架构，资源占用少，并发性能强
-- 🚀 **部署简单** - 自带免费代理源，开箱即用
-- 🔧 **易于扩展** - 支持自定义代理源，满足特殊需求
+- **🔄 虚拟代理池** - 支持创建多个逻辑隔离的代理池，提高资源利用率
+- **📡 RESTful API** - 标准化的接口设计，易于集成和使用
+- **⚡ 高性能架构** - 基于协程和多线程，资源占用低，响应速度快
+- **🎯 智能调度** - 自动化代理获取和验证机制
+- **📦 开箱即用** - 内置多个免费代理源，快速部署
+- **🔧 易于扩展** - 支持自定义代理源，灵活配置
 
-## 🏗️ 系统架构
+## 🛠️ 技术栈
 
-```
-bproxypool/
-├── controller/          # 控制器层，处理HTTP请求
-├── core/               # 核心模块，基础类和配置
-├── http/               # HTTP客户端封装
-├── service/            # 业务逻辑层
-├── utils/              # 工具模块
-├── scheduler.py        # 调度器，负责代理获取和验证
-└── server.py          # Web服务器
-```
+- **语言**: Python 3.7+
+- **框架**: Flask + aiohttp
+- **数据库**: Redis
+- **调度器**: APScheduler
+- **部署**: Gunicorn
 
-## 📋 前置依赖
+## 📋 系统要求
 
-- **Python**: 3.7+
-- **Redis**: 任意版本
-- **系统**: Linux/macOS/Windows
+- Python 3.7+
+- Redis 服务器
+- 8GB+ 内存推荐
 
 ## 🚀 快速开始
 
-### 1. 安装部署
+### 1. 安装依赖
 
 ```bash
 # 克隆项目
 git clone <repository-url>
 cd bproxypool
 
-# 安装依赖
+# 安装Python依赖
 pip install -r requirements.txt
-
-# 配置修改
-vim config/frame_settings.py    # 修改配置文件
-vim config/gunicorn.py          # 修改gunicorn配置
 ```
 
-### 2. 启动服务
+### 2. 配置系统
+
+```bash
+# 修改框架配置
+vim config/frame_settings.py
+
+# 配置Gunicorn
+vim config/gunicorn.py
+```
+
+### 3. 启动服务
 
 ```bash
 # 启动调度器（负责抓取和验证代理）
@@ -77,24 +79,24 @@ curl http://localhost:8080/status/
 curl http://localhost:8080/proxy/
 ```
 
-## 📚 API文档
+## 📚 API 接口文档
 
-### 基础接口
+### 基础代理操作
 
-| 接口路径 | 请求方法 | 功能描述 | 参数说明 |
-|---------|---------|----------|----------|
+| 接口 | 方法 | 功能描述 | 参数 |
+|------|------|----------|------|
 | `/proxy/` | GET | 随机获取一个代理 | 无 |
-| `/proxy/` | DELETE | 从代理池中删除指定代理 | proxy: 代理地址, source: 代理来源 |
-| `/status/` | GET | 查看代理池状态信息 | 无 |
+| `/proxy/` | DELETE | 删除指定代理 | proxy, source |
+| `/status/` | GET | 获取代理池状态 | 无 |
 
-### 虚拟代理池接口
+### 虚拟代理池操作
 
-| 接口路径 | 请求方法 | 功能描述 | 参数说明 |
-|---------|---------|----------|----------|
-| `/proxy/<virtual_pool>` | GET | 从虚拟代理池获取代理 | 首次访问会自动创建虚拟池 |
-| `/proxy/<virtual_pool>` | DELETE | 从虚拟代理池删除代理 | proxy: 代理地址, source: 代理来源 |
-| `/proxy/<virtual_pool>` | PATCH | 冷却虚拟池中的代理 | proxy: 代理地址, expire: 冷却时间(秒) |
-| `/vpool/<virtual_pool>/` | DELETE | 删除整个虚拟代理池 | 无 |
+| 接口 | 方法 | 功能描述 | 参数 |
+|------|------|----------|------|
+| `/proxy/<virtual_pool>` | GET | 从虚拟池获取代理 | 无 |
+| `/proxy/<virtual_pool>` | DELETE | 从虚拟池删除代理 | proxy, source |
+| `/proxy/<virtual_pool>` | PATCH | 冷却代理（暂时不可用） | proxy, expire |
+| `/vpool/<virtual_pool>/` | DELETE | 删除虚拟代理池 | 无 |
 
 ### 返回数据格式
 
@@ -111,126 +113,118 @@ curl http://localhost:8080/proxy/
 
 详细状态码说明请参考：[API状态码文档](./code.md)
 
-## 🔧 自定义代理源
+## 💻 使用示例
 
-### 1. 创建代理源文件
-
-```bash
-# 进入代理源目录
-cd proxy
-
-# 创建新的代理源文件
-vim custom_proxy_getter.py
-```
-
-### 2. 实现代理源类
+### 同步方式获取代理
 
 ```python
+import requests
+
+def get_proxy():
+    url = 'http://host:port/proxy/my_pool'
+    response = requests.get(url).json()
+    return response['data']
+
+# 返回格式: {"proxy": "127.0.0.1:8080", "source": "ProxySource"}
+```
+
+### 异步方式获取代理
+
+```python
+import aiohttp
+import json
+
+async def get_proxy(timeout=10):
+    timeout_config = aiohttp.ClientTimeout(total=timeout)
+    async with aiohttp.ClientSession() as session:
+        async with session.get(
+            'http://host:port/proxy/my_pool',
+            timeout=timeout_config
+        ) as response:
+            result = json.loads(await response.text())
+            return result['data']
+```
+
+## 🔧 扩展开发
+
+### 添加自定义代理源
+
+1. 在 `proxy/` 目录下创建新的获取器文件：
+
+```python
+# proxy/custom_proxy_getter.py
 from bproxypool.core import BaseProxyGetter
 from bproxypool.http import Request
 from proxy import log
 
 class CustomProxySource(BaseProxyGetter):
-    """自定义代理源示例"""
-    
-    # 获取频率：每20秒获取一次
-    get_rate = 20
+    # 获取频率（秒）
+    get_rate = 30
     
     async def get_proxy(self) -> list:
         """
-        获取代理列表
-        :return: 代理列表，格式为 ['127.0.0.1:8080', '192.168.1.1:3128']
+        返回代理列表，格式: ['ip:port', 'ip:port', ...]
         """
-        url = 'https://your-proxy-source.com/api'
+        url = 'your-proxy-source-url'
+        response = await self._request(Request(url, headers=self.header))
         
-        try:
-            resp = await self._request(Request(url, headers=self.header))
-            log.info(f'获取代理响应: {resp.status}')
-            
-            if resp and resp.status == 200:
-                # 解析响应数据，返回代理列表
-                return self._parse_proxies(resp.text)
-            else:
-                log.warning(f'获取代理失败: {url}, 状态码: {resp.status}')
-                
-        except Exception as e:
-            log.error(f'获取代理异常: {e}')
-            
-        return []
+        if response and response.status == 200:
+            # 解析响应数据，返回代理列表
+            proxies = self.parse_response(response.text)
+            log.info(f'获取到 {len(proxies)} 个代理')
+            return proxies
+        else:
+            log.warning(f'{self.__class__.__name__} 获取代理失败')
+            return []
     
-    def _parse_proxies(self, text: str) -> list:
-        """解析代理数据"""
-        # 根据实际API响应格式进行解析
+    def parse_response(self, text):
+        # 实现你的解析逻辑
         return text.strip().split('\n')
 ```
 
-### 3. 重启调度器
+2. 重启调度服务：
 
 ```bash
-# 重启调度器以加载新的代理源
 sh restart.sh scheduler
 ```
 
-## 💻 使用示例
+## 📂 项目结构
 
-### 同步调用
-
-```python
-import requests
-
-def get_proxy(virtual_pool='default'):
-    """获取代理"""
-    url = f'http://localhost:8080/proxy/{virtual_pool}'
-    response = requests.get(url)
-    
-    if response.status_code == 200:
-        data = response.json()
-        return data['data']
-    return None
-
-# 使用示例
-proxy_info = get_proxy('crawl_pool_1')
-if proxy_info:
-    proxy = proxy_info['proxy']
-    print(f"获取到代理: {proxy}")
+```
+bproxypool/
+├── bproxypool/          # 核心框架代码
+│   ├── controller/      # API控制器
+│   ├── core/           # 核心组件
+│   ├── http/           # HTTP客户端
+│   ├── service/        # 业务逻辑
+│   └── utils/          # 工具类
+├── config/             # 配置文件
+├── proxy/              # 代理获取器
+├── log/                # 日志目录
+└── requirements.txt    # 依赖清单
 ```
 
-### 异步调用
+## 🔄 运维管理
 
-```python
-import aiohttp
-import asyncio
+```bash
+# 启动服务
+sh start.sh scheduler   # 启动调度器
+sh start.sh service     # 启动API服务
 
-async def get_proxy_async(virtual_pool='default', timeout=10):
-    """异步获取代理"""
-    url = f'http://localhost:8080/proxy/{virtual_pool}'
-    
-    timeout_config = aiohttp.ClientTimeout(total=timeout)
-    async with aiohttp.ClientSession(timeout=timeout_config) as session:
-        try:
-            async with session.get(url) as response:
-                if response.status == 200:
-                    data = await response.json()
-                    return data['data']
-        except asyncio.TimeoutError:
-            print("请求超时")
-        except Exception as e:
-            print(f"请求异常: {e}")
-    
-    return None
+# 重启服务
+sh restart.sh scheduler # 重启调度器
+sh restart.sh service   # 重启API服务
 
-# 使用示例
-async def main():
-    proxy_info = await get_proxy_async('crawl_pool_2')
-    if proxy_info:
-        proxy = proxy_info['proxy']
-        print(f"获取到代理: {proxy}")
-
-# 运行
-asyncio.run(main())
+# 停止服务
+sh stop.sh              # 停止所有服务
 ```
 
-### 代理管理
+## 📖 相关文档
+
+- [API 状态码说明](./code.md)
+- [配置文件详解](./config/)
+
+## 代理管理示例
 
 ```python
 import requests
@@ -312,15 +306,16 @@ timeout = 30
 2. 创建特性分支 (`git checkout -b feature/AmazingFeature`)
 3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
 4. 推送到分支 (`git push origin feature/AmazingFeature`)
-5. 打开 Pull Request
+5. 开启 Pull Request
 
-## 📄 许可证
+## 📄 开源协议
 
-本项目基于 MIT 许可证开源 - 查看 [LICENSE](LICENSE) 文件了解详情
+本项目采用 MIT 协议，详情请参阅 [LICENSE](LICENSE) 文件。
 
 ## 🙏 致谢
 
-本项目中的免费代理获取逻辑参考了 [proxy_pool](https://github.com/jhao104/proxy_pool) 项目，感谢 [@jhao104](https://github.com/jhao104) 的贡献。
+- 免费代理源的抓取逻辑参考了 [proxy_pool](https://github.com/jhao104/proxy_pool) 项目
+- 感谢所有为本项目做出贡献的开发者
 
 ## 📞 联系方式
 
